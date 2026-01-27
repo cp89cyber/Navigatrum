@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 
 test('preload contract is intentionally tiny and documented', () => {
   const contract = {
-    functions: ['navigate', 'goBack', 'goForward', 'reload'],
+    functions: ['navigate', 'goBack', 'goForward', 'reload', 'resizeWebview'],
   };
 
   assert.deepEqual(contract.functions, [
@@ -11,5 +11,6 @@ test('preload contract is intentionally tiny and documented', () => {
     'goBack',
     'goForward',
     'reload',
+    'resizeWebview',
   ]);
 });

@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('navigatrum', {
   goBack: () => ipcRenderer.send(channels.back),
   goForward: () => ipcRenderer.send(channels.forward),
   reload: () => ipcRenderer.send(channels.reload),
+  resizeWebview: (payload) => ipcRenderer.invoke(channels.resizeWebview, payload),
 });
