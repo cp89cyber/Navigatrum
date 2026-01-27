@@ -1,5 +1,5 @@
 const path = require('node:path');
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, webContents } = require('electron');
 
 const { channels } = require('./ipc-channels');
 const { normalizeUserUrl } = require('./url-utils');
@@ -49,6 +49,24 @@ app.on('window-all-closed', () => {
 
 ipcMain.handle(channels.navigate, (_event, input) => {
   return normalizeUserUrl(input);
+});
+
+ipcMain.handle(channels.resizeWebview, (_event, payload) => {
+  const { webContentsId, width, height } = payload || {};
+  if (!Number.isInteger(webContentsId)) {
+    return false;
+  }
+
+  const guest = webContents.fromId(webContentsId);
+  if (!guest || typeof guest.setSize !== 'function') {
+    return false;
+  }
+
+  const safeWidth = Math.max(1, Math.floor(Number(width) || 0));
+  const safeHeight = Math.max(1, Math.floor(Number(height) || 0));
+
+  guest.setSize({ width: safeWidth, height: safeHeight });
+  return true;
 });
 
 ipcMain.on(channels.back, () => {

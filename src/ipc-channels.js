@@ -3,6 +3,7 @@ const channels = {
   back: 'browser:back',
   forward: 'browser:forward',
   reload: 'browser:reload',
+  resizeWebview: 'browser:resize-webview',
 };
 
 module.exports = {

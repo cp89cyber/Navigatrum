@@ -9,5 +9,6 @@ test('navigation IPC channel names are namespaced and stable', () => {
     back: 'browser:back',
     forward: 'browser:forward',
     reload: 'browser:reload',
+    resizeWebview: 'browser:resize-webview',
   });
 });
