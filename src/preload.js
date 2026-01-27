@@ -1,8 +1,9 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const { channels } = require('./ipc-channels');
 
 contextBridge.exposeInMainWorld('navigatrum', {
-  navigate: (input) => ipcRenderer.invoke('browser:navigate', input),
-  goBack: () => ipcRenderer.send('browser:back'),
-  goForward: () => ipcRenderer.send('browser:forward'),
-  reload: () => ipcRenderer.send('browser:reload'),
+  navigate: (input) => ipcRenderer.invoke(channels.navigate, input),
+  goBack: () => ipcRenderer.send(channels.back),
+  goForward: () => ipcRenderer.send(channels.forward),
+  reload: () => ipcRenderer.send(channels.reload),
 });

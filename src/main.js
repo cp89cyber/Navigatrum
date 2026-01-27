@@ -1,7 +1,10 @@
 const path = require('node:path');
 const { app, BrowserWindow, ipcMain } = require('electron');
 
+const { channels } = require('./ipc-channels');
 const { normalizeUserUrl } = require('./url-utils');
+
+let mainWindow = null;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -21,6 +24,11 @@ function createWindow() {
   });
 
   win.loadFile(path.join(__dirname, 'renderer/index.html'));
+  win.on('closed', () => {
+    mainWindow = null;
+  });
+
+  mainWindow = win;
 }
 
 app.whenReady().then(() => {
@@ -39,6 +47,18 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.handle('browser:navigate', (_event, input) => {
+ipcMain.handle(channels.navigate, (_event, input) => {
   return normalizeUserUrl(input);
+});
+
+ipcMain.on(channels.back, () => {
+  // Reserved for future navigation orchestration from the main process.
+});
+
+ipcMain.on(channels.forward, () => {
+  // Reserved for future navigation orchestration from the main process.
+});
+
+ipcMain.on(channels.reload, () => {
+  // Reserved for future navigation orchestration from the main process.
 });
