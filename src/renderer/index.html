@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self';"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigatrum</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="chrome">
+      <div class="nav-buttons">
+        <button id="back" title="Back">←</button>
+        <button id="forward" title="Forward">→</button>
+        <button id="reload" title="Reload">⟳</button>
+      </div>
+      <form id="address-form" class="address-bar" autocomplete="off">
+        <input
+          id="address-input"
+          name="address"
+          type="text"
+          placeholder="Search or enter address"
+        />
+      </form>
+    </header>
+
+    <main class="viewport">
+      <webview id="webview" src="https://duckduckgo.com" allowpopups></webview>
+    </main>
+
+    <script src="./renderer.js" defer></script>
+  </body>
+</html>
