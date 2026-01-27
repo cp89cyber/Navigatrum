@@ -1,0 +1,13 @@
+{
+  "name": "navigatrum",
+  "version": "0.1.0",
+  "description": "An open source web browser alternative",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}
