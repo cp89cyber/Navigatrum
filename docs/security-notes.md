@@ -7,6 +7,7 @@ Current mitigations:
 - `nodeIntegration: false`
 - `sandbox: true`
 - A restrictive renderer Content Security Policy
+- uBlock Origin loads as an unpacked extension in the `persist:navigatrum` session
 
 Future improvements:
 - Navigation allow/block lists
@@ -14,3 +15,7 @@ Future improvements:
 - Download handling
 - Certificate error handling
 - Session partitioning per tab
+
+Additional considerations:
+- The updater downloads extension assets from GitHub Releases. Future hardening
+  should include integrity verification and explicit update prompts.
