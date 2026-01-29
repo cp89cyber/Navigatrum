@@ -109,8 +109,9 @@ test('update downloads, extracts, and loads new version', async () => {
       },
       extractZip: async (_zipPath, targetDir) => {
         calls.extract = targetDir;
-        await fs.mkdir(targetDir, { recursive: true });
-        await fs.writeFile(path.join(targetDir, 'manifest.json'), '{}');
+        const nested = path.join(targetDir, 'uBlock0.chromium');
+        await fs.mkdir(nested, { recursive: true });
+        await fs.writeFile(path.join(nested, 'manifest.json'), '{}');
       },
     },
   });
@@ -120,5 +121,5 @@ test('update downloads, extracts, and loads new version', async () => {
   assert.equal(status.currentVersion, '1.69.3');
   assert.ok(calls.download);
   assert.ok(calls.extract);
-  assert.equal(calls.load, path.join(extensionsBase, '1.69.3'));
+  assert.equal(calls.load, path.join(extensionsBase, '1.69.3', 'uBlock0.chromium'));
 });

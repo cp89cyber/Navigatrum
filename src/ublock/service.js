@@ -49,6 +49,28 @@ function createUblockService(options = {}) {
     }
   }
 
+  async function resolveExtensionRoot(basePath) {
+    const manifestPath = path.join(basePath, 'manifest.json');
+    if (await pathExists(manifestPath)) {
+      return basePath;
+    }
+
+    try {
+      const entries = await fs.readdir(basePath, { withFileTypes: true });
+      const directories = entries.filter((entry) => entry.isDirectory());
+      if (directories.length === 1) {
+        const candidate = path.join(basePath, directories[0].name);
+        if (await pathExists(path.join(candidate, 'manifest.json'))) {
+          return candidate;
+        }
+      }
+    } catch (error) {
+      return basePath;
+    }
+
+    return basePath;
+  }
+
   function buildStatus(state) {
     const stableAvailable =
       state.currentVersion && state.latestStable
@@ -74,11 +96,15 @@ function createUblockService(options = {}) {
     let currentVersion = current.currentVersion;
 
     if (currentPath && (await pathExists(currentPath))) {
-      await manager.loadExtension(currentPath);
+      const resolved = await resolveExtensionRoot(currentPath);
+      await manager.loadExtension(resolved);
+      currentPath = resolved;
     } else {
       currentPath = bundledPath();
       currentVersion = bundledVersion;
-      await manager.loadExtension(currentPath);
+      const resolved = await resolveExtensionRoot(currentPath);
+      await manager.loadExtension(resolved);
+      currentPath = resolved;
     }
 
     const nextState = await stateOps.writeState(stateFile, {
@@ -151,12 +177,13 @@ function createUblockService(options = {}) {
     await updater.extractZip(downloadPath, installPath);
     await fs.rm(downloadPath, { force: true });
 
-    await manager.loadExtension(installPath);
+    const resolvedPath = await resolveExtensionRoot(installPath);
+    await manager.loadExtension(resolvedPath);
 
     const nextState = await stateOps.writeState(stateFile, {
       ...updatedState,
       currentVersion: version,
-      currentPath: installPath,
+      currentPath: resolvedPath,
     });
 
     return buildStatus(nextState);
