@@ -6,5 +6,6 @@ const path = require('node:path');
 test('main process loads bundled uBlock extension', async () => {
   const mainPath = path.join(__dirname, '..', 'src', 'main.js');
   const contents = await fs.readFile(mainPath, 'utf8');
-  assert.match(contents, /loadBundledExtension/);
+  assert.match(contents, /createUblockService/);
+  assert.match(contents, /ublockService\.initialize/);
 });
