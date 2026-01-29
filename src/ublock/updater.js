@@ -55,11 +55,14 @@ async function extractZip(zipPath, targetDir) {
   await extract(zipPath, { dir: targetDir });
 }
 
-async function downloadFile(url, targetPath, onProgress) {
+async function downloadFile(url, targetPath, onProgress, redirectsRemaining = 5) {
+  if (redirectsRemaining < 0) {
+    throw new Error('Too many redirects while downloading.');
+  }
+
   await fsp.mkdir(path.dirname(targetPath), { recursive: true });
 
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(targetPath);
     const client = getClient(url);
 
     const request = client.get(
@@ -70,12 +73,25 @@ async function downloadFile(url, targetPath, onProgress) {
         },
       },
       (res) => {
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400) {
+          if (!res.headers.location) {
+            reject(new Error(`Redirect without location: ${res.statusCode}`));
+            res.resume();
+            return;
+          }
+          const nextUrl = new URL(res.headers.location, url).toString();
+          res.resume();
+          resolve(downloadFile(nextUrl, targetPath, onProgress, redirectsRemaining - 1));
+          return;
+        }
+
         if (res.statusCode !== 200) {
           reject(new Error(`Download failed: ${res.statusCode}`));
           res.resume();
           return;
         }
 
+        const file = fs.createWriteStream(targetPath);
         const total = Number(res.headers['content-length'] || 0);
         let received = 0;
 
@@ -88,12 +104,11 @@ async function downloadFile(url, targetPath, onProgress) {
 
         res.pipe(file);
         file.on('finish', () => file.close(resolve));
+        file.on('error', reject);
       },
     );
 
-    request.on('error', (error) => {
-      file.close(() => reject(error));
-    });
+    request.on('error', reject);
   });
 }
 

@@ -45,6 +45,12 @@ async function startFixtureServer() {
       return;
     }
 
+    if (req.url === '/redirect') {
+      res.writeHead(302, { Location: `${state.baseUrl}/asset.zip` });
+      res.end();
+      return;
+    }
+
     if (req.url === '/asset.zip') {
       res.writeHead(200, {
         'Content-Type': 'application/zip',
@@ -78,6 +84,19 @@ test('downloadFile stores a remote asset', async () => {
   try {
     await fs.rm(downloadTarget, { force: true });
     await downloadFile(`${baseUrl}/asset.zip`, downloadTarget);
+    const stats = await fs.stat(downloadTarget);
+    assert.ok(stats.size > 0);
+  } finally {
+    server.close();
+  }
+});
+
+test('downloadFile follows redirects', async () => {
+  const { server, baseUrl } = await startFixtureServer();
+  const downloadTarget = path.join(__dirname, '.tmp', 'redirect.zip');
+  try {
+    await fs.rm(downloadTarget, { force: true });
+    await downloadFile(`${baseUrl}/redirect`, downloadTarget);
     const stats = await fs.stat(downloadTarget);
     assert.ok(stats.size > 0);
   } finally {

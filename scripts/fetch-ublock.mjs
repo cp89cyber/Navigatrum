@@ -1,9 +1,11 @@
 import fs from 'node:fs/promises';
-import { createWriteStream } from 'node:fs';
 import path from 'node:path';
-import https from 'node:https';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import extract from 'extract-zip';
+
+const require = createRequire(import.meta.url);
+const { downloadFile } = require('../src/ublock/updater');
 
 const version = process.argv[2] || '1.69.0';
 const filename = `uBlock0_${version}.chromium.zip`;
@@ -15,20 +17,7 @@ const zipPath = path.join(bundledRoot, `${version}.zip`);
 
 await fs.mkdir(bundledRoot, { recursive: true });
 
-await new Promise((resolve, reject) => {
-  const file = createWriteStream(zipPath);
-  https
-    .get(url, { headers: { 'User-Agent': 'Navigatrum' } }, (res) => {
-      if (res.statusCode !== 200) {
-        reject(new Error(`Download failed: ${res.statusCode}`));
-        res.resume();
-        return;
-      }
-      res.pipe(file);
-      file.on('finish', () => file.close(resolve));
-    })
-    .on('error', reject);
-});
+await downloadFile(url, zipPath);
 
 await fs.rm(target, { recursive: true, force: true });
 await extract(zipPath, { dir: target });
