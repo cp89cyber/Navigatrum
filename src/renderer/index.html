@@ -25,12 +25,42 @@
           placeholder="Search or enter address"
         />
       </form>
+      <div class="chrome-actions">
+        <button id="ublock-button" class="ublock-button" title="uBlock Origin">
+          uBO
+          <span class="badge" hidden></span>
+        </button>
+      </div>
     </header>
+
+    <section id="ublock-panel" class="ublock-panel" hidden>
+      <div class="ublock-panel__header">
+        <h2>uBlock Origin</h2>
+        <button id="ublock-close" class="icon-button" title="Close">✕</button>
+      </div>
+      <p id="ublock-current" class="ublock-meta"></p>
+      <p id="ublock-latest" class="ublock-meta"></p>
+      <p id="ublock-last-check" class="ublock-meta"></p>
+      <div class="ublock-actions">
+        <button id="ublock-update-stable">Update to stable</button>
+        <button id="ublock-update-prerelease" class="warn">Update to prerelease</button>
+        <button id="ublock-check" class="ghost">Check now</button>
+        <button id="ublock-open-folder" class="ghost">Open extension folder</button>
+      </div>
+      <p id="ublock-warning" class="warning" hidden>
+        Prerelease builds may be unstable.
+      </p>
+      <div id="ublock-progress" class="ublock-progress" hidden>
+        <div class="ublock-progress__bar"></div>
+      </div>
+      <p id="ublock-status" class="ublock-status"></p>
+    </section>
 
     <main class="viewport">
       <webview
         id="webview"
         src="https://duckduckgo.com"
+        partition="persist:navigatrum"
         allowpopups
         autosize="on"
         minwidth="100"
