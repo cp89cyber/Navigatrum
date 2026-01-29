@@ -3,10 +3,10 @@ const { app, BrowserWindow, ipcMain, webContents } = require('electron');
 
 const { channels } = require('./ipc-channels');
 const { normalizeUserUrl } = require('./url-utils');
-const { createExtensionManager } = require('./ublock/manager');
+const { createUblockService } = require('./ublock/service');
 
 let mainWindow = null;
-const extensionManager = createExtensionManager();
+const ublockService = createUblockService();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -35,12 +35,15 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   try {
-    await extensionManager.loadBundledExtension();
+    await ublockService.initialize();
   } catch (error) {
-    console.error('Failed to load bundled uBlock Origin:', error);
+    console.error('Failed to load uBlock Origin:', error);
   }
 
   createWindow();
+  ublockService.check().catch((error) => {
+    console.warn('Failed to check for uBlock Origin updates:', error);
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -87,4 +90,22 @@ ipcMain.on(channels.forward, () => {
 
 ipcMain.on(channels.reload, () => {
   // Reserved for future navigation orchestration from the main process.
+});
+
+ipcMain.handle(channels.ublockStatus, () => ublockService.getStatus());
+ipcMain.handle(channels.ublockCheck, () => ublockService.check());
+ipcMain.handle(channels.ublockOpenFolder, () => ublockService.openFolder());
+ipcMain.handle(channels.ublockUpdate, async (event, channel) => {
+  try {
+    const status = await ublockService.update(channel, {
+      onProgress: (progress) => {
+        event.sender.send(channels.ublockProgress, { progress });
+      },
+    });
+    event.sender.send(channels.ublockDone, status);
+    return status;
+  } catch (error) {
+    event.sender.send(channels.ublockError, { message: error.message });
+    throw error;
+  }
 });
