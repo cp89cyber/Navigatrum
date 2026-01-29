@@ -3,8 +3,10 @@ const { app, BrowserWindow, ipcMain, webContents } = require('electron');
 
 const { channels } = require('./ipc-channels');
 const { normalizeUserUrl } = require('./url-utils');
+const { createExtensionManager } = require('./ublock/manager');
 
 let mainWindow = null;
+const extensionManager = createExtensionManager();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -31,7 +33,13 @@ function createWindow() {
   mainWindow = win;
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  try {
+    await extensionManager.loadBundledExtension();
+  } catch (error) {
+    console.error('Failed to load bundled uBlock Origin:', error);
+  }
+
   createWindow();
 
   app.on('activate', () => {
